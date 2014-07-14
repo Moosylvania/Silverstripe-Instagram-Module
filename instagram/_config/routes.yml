@@ -1,0 +1,6 @@
+Name: instagram
+After: framework/routes
+---
+Director:
+  rules:
+    'instagram': 'Instagram_Controller',

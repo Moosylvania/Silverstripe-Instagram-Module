@@ -1,0 +1,9 @@
+---
+Name: Instagram
+---
+Instagram:
+  clientSecret: e5d90efab5d54df3bd8da383bcc79f5d
+  clientID: d34a4964ef91458f8b53af1a0fef643c
+  callbackUrl: instagram/auth
+  subscribeCallback: instagram/handlepost
+  PostReceivedCallback: 
