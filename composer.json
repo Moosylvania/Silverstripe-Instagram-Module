@@ -1,0 +1,15 @@
+{
+	"name": "moosylvania/silverstripe-instagram-module",
+	"description": "Instagram Module for SilverStripe.",
+	"type": "silverstripe-module",
+	"keywords": ["silverstripe", "instagram", "instagramservice", "realtime"],
+	"license": "MIT",
+	"authors": [{
+		"name": "Mitch Viner",
+		"email": "mitch.viner@moosylvania.com"
+	}],
+	"require": {
+		"silverstripe/framework": "~3.1",
+		"silverstripe/cms": "~3.1"
+	}
+}
