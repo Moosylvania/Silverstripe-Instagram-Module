@@ -5,7 +5,7 @@ class Instagram extends DataObject {}
 class Instagram_Controller extends Controller {
 
 	private static $allowed_actions = array(
-		'handlepost' = true, 
+		'handlepost' => true, 
 		'auth' => true, 
 		'subscribe' => 'ADMIN', 
 		"bounce" => true, 
@@ -164,5 +164,5 @@ class Instagram_Controller extends Controller {
 	protected function getMostRecent() {
 		return InstagramPost::get()->sort("Posted DESC")->First();
 	}
-	
+
 }
