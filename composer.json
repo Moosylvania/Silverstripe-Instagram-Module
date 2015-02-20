@@ -7,6 +7,9 @@
 	"authors": [{
 		"name": "Mitch Viner",
 		"email": "mitch.viner@moosylvania.com"
+	},{
+		"name": "Joe Madden",
+		"email": "joe.madden@moosylvania.com"
 	}],
 	"require": {
 		"silverstripe/framework": "~3.1",
