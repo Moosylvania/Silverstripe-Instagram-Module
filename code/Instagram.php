@@ -42,28 +42,30 @@ class Instagram_Controller extends Controller {
 
     /**
      *
-	 * Subscribe to Instagram from a Link generated via the admin. Just forwards to the service. 
+	 * Subscribe to Instagram from a Link generated via the admin. Just forwards to the service.
      *
      * */
     public function subscribe() {
     	$is = new InstagramService();
     	if($is->subscribeRealtime()) {
-    		$this->redirect('admin/instagram-settings/InstagramSubscription/EditForm/field/InstagramSubscription/item/'.Session::get('InstaSub').'/edit');
-    	}
-    	throw new Exception('Unable to subscribe to Instagram. See logs for more info.');
+    		return $this->redirect('admin/instagram-settings/InstagramSubscription/EditForm/field/InstagramSubscription/item/'.Session::get('InstaSub').'/edit');
+    	} else {
+		    throw new Exception('Unable to subscribe to Instagram. See logs for more info.');
+	    }
     }
 
     /**
      *
-	 * Unsubscribe to Instagram from a Link generated via the admin. Just forwards to the service. 
+	 * Unsubscribe to Instagram from a Link generated via the admin. Just forwards to the service.
      *
      * */
     public function unsubscribe() {
     	$is = new InstagramService();
     	if($is->unsubscribeRealtime()) {
-    		$this->redirect('admin/instagram-settings/InstagramSubscription/EditForm/field/InstagramSubscription/item/'.Session::get('InstaSub').'/edit');	
-    	}
-    	throw new Exception('Unable to unsubscribe to Instagram. See logs for more info.');
+    		return $this->redirect('admin/instagram-settings/InstagramSubscription/EditForm/field/InstagramSubscription/item/'.Session::get('InstaSub').'/edit');
+    	} else {
+		    throw new Exception('Unable to unsubscribe to Instagram. See logs for more info.');
+	    }
     }
 
     /**
