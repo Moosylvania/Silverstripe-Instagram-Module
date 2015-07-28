@@ -20,7 +20,7 @@ class InstagramPost extends SocialPost {
 	private static $default_sort = "Posted DESC";
 
 	public function setTags($tags) {
-		$this->Tags = implode(',', $tags);
+		$this->Tags = is_array($tags) ? implode(',', $tags) : $tags;
 	}
 
 }

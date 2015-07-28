@@ -196,7 +196,7 @@ class InstagramService extends RestfulService {
      * @return std_class of media found based on parameters given
      */
     public function getUserRecent($user_id, $max_id = null, $min_id = null, $max_timestamp = null, $min_timestamp = null) {
-        $url = sprintf($this->api_urls['user_recent'], $user_id, $this->access_token(), $maxi_id, $min_id, $max_timestamp, $min_timestamp);
+        $url = sprintf($this->api_urls['user_recent'], $user_id, $this->access_token(), $max_id, $min_id, $max_timestamp, $min_timestamp);
 
         return $this->json_request($url);
     }
