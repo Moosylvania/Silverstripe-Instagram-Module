@@ -33,7 +33,7 @@ class InstagramSubscription extends DataObject {
 			if($this->SubscriptionID) {
 				$fields->addFieldToTab("Root.Main", new LiteralField("SubscribeRealtime", '<div class="field text"><label class="left">Unsubscribe:</label><div class="middleColumn"><a href="/instagram/unsubscribe?subscription='.$this->ID.'" id="sync-cigars" class="ss-ui-button ss-ui-action-destructive" >Unsubscribe</a> Current Subscription: '.$subID.'</div></div>'));
 			}
-			if($this->Posts()->Count() == 0 && !empty($token)) {
+			if(!empty($token)) {
 				$fields->addFieldToTab("Root.Main", new LiteralField("PopulateSubscription", '<div class="field text"><label class="left">Fetch recent items:</label><div class="middleColumn"><a href="/instagram/prefetch?subscription='.$this->ID.'" id="sync-cigars" class="ss-ui-button ss-ui-action-constructive" >Fetch</a></div></div>'));
 			}
 		}
