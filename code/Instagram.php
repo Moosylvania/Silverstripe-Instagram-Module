@@ -5,11 +5,12 @@ class Instagram extends DataObject {}
 class Instagram_Controller extends Controller {
 
 	private static $allowed_actions = array(
-		'handlepost' => true, 
-		'auth' => true, 
-		'subscribe' => 'ADMIN', 
-		"bounce" => true, 
-		'unsubscribe' => 'ADMIN'
+		'handlepost' => true,
+		'auth' => true,
+		'subscribe' => 'ADMIN',
+		"bounce" => true,
+		'unsubscribe' => 'ADMIN',
+		'prefetch' => true,
 	);
 
 	public function init() {
@@ -27,7 +28,7 @@ class Instagram_Controller extends Controller {
         $code = $_GET['code'];
 
         $is = new InstagramService();
-        $is->authorize($code);        
+        $is->authorize($code);
 
     }
 
@@ -42,28 +43,30 @@ class Instagram_Controller extends Controller {
 
     /**
      *
-	 * Subscribe to Instagram from a Link generated via the admin. Just forwards to the service. 
+	 * Subscribe to Instagram from a Link generated via the admin. Just forwards to the service.
      *
      * */
     public function subscribe() {
     	$is = new InstagramService();
     	if($is->subscribeRealtime()) {
-    		$this->redirect('admin/instagram-settings/InstagramSubscription/EditForm/field/InstagramSubscription/item/'.Session::get('InstaSub').'/edit');
-    	}
-    	throw new Exception('Unable to subscribe to Instagram. See logs for more info.');
+    		return $this->redirect('admin/instagram-settings/InstagramSubscription/EditForm/field/InstagramSubscription/item/'.Session::get('InstaSub').'/edit');
+    	} else {
+		    throw new Exception('Unable to subscribe to Instagram. See logs for more info.');
+	    }
     }
 
     /**
      *
-	 * Unsubscribe to Instagram from a Link generated via the admin. Just forwards to the service. 
+	 * Unsubscribe to Instagram from a Link generated via the admin. Just forwards to the service.
      *
      * */
     public function unsubscribe() {
     	$is = new InstagramService();
     	if($is->unsubscribeRealtime()) {
-    		$this->redirect('admin/instagram-settings/InstagramSubscription/EditForm/field/InstagramSubscription/item/'.Session::get('InstaSub').'/edit');	
-    	}
-    	throw new Exception('Unable to unsubscribe to Instagram. See logs for more info.');
+    		return $this->redirect('admin/instagram-settings/InstagramSubscription/EditForm/field/InstagramSubscription/item/'.Session::get('InstaSub').'/edit');
+    	} else {
+		    throw new Exception('Unable to unsubscribe to Instagram. See logs for more info.');
+	    }
     }
 
     /**
@@ -74,8 +77,8 @@ class Instagram_Controller extends Controller {
 	 * Optionally: calls a callback function set in _config.yml for each post after the DataObject is created.
      *
      * */
-	public function handlepost() {		
-		
+	public function handlepost() {
+
 		if($this->request->isGET()) {
 			echo $_GET['hub_challenge'];
 			exit;
@@ -86,6 +89,7 @@ class Instagram_Controller extends Controller {
 			$ALL = date("F j, Y, g:i a")." ".$mystring."\r\n";
 			$fh = fopen(__DIR__.'/instagramactivity.log', 'a+');
 			fwrite($fh, $ALL);
+			fclose($fh);
 
 			$data = json_decode($mystring);
 
@@ -93,66 +97,29 @@ class Instagram_Controller extends Controller {
 
 			if(!$sub) {
 				error_log('Unable to find subscription for subscription id: '.$data[0]->subscription_id);
-				return false; 
+				return false;
 			}
 
-			$is = new InstagramService($sub);
+			$sub->updatePosts($data[0]->object_id);
+		}
+	}
 
-			$minID = $sub->MinID;
+	/**
+	 * @param SS_HTTPRequest $request
+	 * @return SS_HTTPResponse
+	 * @throws Exception
+	 */
+	public function prefetch($request) {
+		$subscription = InstagramSubscription::get()->byID($request->getVar('subscription'));
+		if (!$subscription) {
+			$this->httpError(404, "Subscription not found");
+		}
 
-			$update = false;
-			switch ($data[0]->object) {
-				case "tag" :
-					$update = $is->tagsRecent($data[0]->object_id, null, $minID);
-					if($update) {
-						$sub->MinID = $update->pagination->min_tag_id;
-					}
-					break;
-				case "user":
-					$update = $is->getUserRecent($data[0]->object_id, null, null, null,  $minID);
-					if($update) {
-						$sub->MinID = $update->data[0]->created_time;
-					}
-					break;
-			}		
-
-			$callbackFunc = Config::inst()->get('Instagram', 'postReceivedCallback');
-
-			if($update) {
-				$sub->write();
-				foreach($update->data as $img) {
-					if(isset($img->id)) {
-						$p = InstagramPost::get()->Filter(array('PostID' => $img->id));
-						if($p->Count() == 0)
-							$p = new InstagramPost();
-						else {
-							$p = $p->first();
-						}
-						if(isset($img->tags)) {
-							$p->setTags($img->tags);
-						}
-						$p->Caption = $img->caption->text;
-						$p->Link = $img->link;
-						$p->Posted = $img->created_time;
-						$p->ImageURL = $img->images->standard_resolution->url;
-						$p->PostID = $img->id;
-						$p->Processed = false;
-						$p->OrigMessage = json_encode($img);
-						$p->Type = "Instagram";
-						$p->CommentCount = $img->comments->count;
-						$p->LikeCount = $img->likes->count;
-						$p->SubscriptionID = $sub->ID;
-						$p->write();						
-
-						if($callbackFunc !== "") {
-							$p->$callbackFunc();
-						}
-					}
-				}
-			}
-
-			fclose($fh);			
-			
+		if ($subscription->updatePosts()) {
+			return $this->redirect('admin/instagram-settings/InstagramSubscription/EditForm/field/InstagramSubscription/item/'
+				. Session::get('InstaSub') . '/edit');
+		} else {
+			throw new Exception('Unable to fetch posts from Instagram. See logs for more info.');
 		}
 	}
 
